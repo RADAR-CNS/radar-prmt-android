@@ -19,6 +19,8 @@
 
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
+    <uses-permission android:name="android.permission.SET_ALARM"/>
+
     <supports-screens android:largeScreens="true"
         android:xlargeScreens="true" />
 
@@ -105,7 +107,7 @@
             android:parentActivityName=".MainActivityImpl"/>
         <service android:name=".RadarServiceImpl"/>
         <service android:name=".AuthServiceImpl"/>
-        <service android:name=".UpdateScheduledService" />
+        <receiver android:name=".UpdateAlarmReceiver"/>
 
         <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->

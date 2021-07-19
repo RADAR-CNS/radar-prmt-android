@@ -3,12 +3,10 @@ package org.radarcns.detail
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
+import org.json.JSONArray
 import org.json.JSONObject
-import org.radarcns.detail.UpdateScheduledService.Companion.UPDATE_VERSION_NAME_KEY
-import org.radarcns.detail.UpdateScheduledService.Companion.UPDATE_VERSION_URL_KEY
+import org.radarcns.detail.UpdatesActivity.Companion.UPDATE_VERSION_NAME_KEY
+import org.radarcns.detail.UpdatesActivity.Companion.UPDATE_VERSION_URL_KEY
 
 fun getUpdatePackage(context: Context, response: String): JSONObject? {
     val updatePackage = getUpdatePackageVersionAndUrl(response)
@@ -36,15 +34,21 @@ fun getInstalledPackageVersion(context: Context): String? {
 }
 
 fun getUpdatePackageVersionAndUrl(response: String): JSONObject? {
-    val responseObject = Json.parseToJsonElement(response)
-    if (responseObject.jsonArray.size > 0) {
-        val latestRelease = responseObject.jsonArray[0]
-        val tagName = latestRelease.jsonObject["tag_name"]?.toString()?.replace("\"", "")
-        val browserDownloadUrl = latestRelease.jsonObject["assets"]?.jsonArray?.get(0)?.jsonObject?.getValue("browser_download_url").toString().replace("\"", "")
-        val updateApk = JSONObject()
-        updateApk.put(UPDATE_VERSION_URL_KEY, browserDownloadUrl)
-        updateApk.put(UPDATE_VERSION_NAME_KEY, tagName)
-        return updateApk
+    try {
+        val responseArray = JSONArray(response)
+        if (responseArray.length() > 0) {
+            val latestRelease = responseArray[0] as JSONObject
+            val tagName = latestRelease["tag_name"]
+            val browserDownloadUrl =
+                ((latestRelease["assets"] as JSONArray).get(0) as JSONObject)["browser_download_url"]
+            val updateApk = JSONObject()
+            updateApk.put(UPDATE_VERSION_URL_KEY, browserDownloadUrl)
+            updateApk.put(UPDATE_VERSION_NAME_KEY, tagName)
+            return updateApk
+        }
+    } catch (t: Throwable) {
+        Log.e("CompareVersions", "Could not parse malformed JSON: \"$response\"")
     }
     return null
 }
+
